@@ -2,7 +2,7 @@ import * as fs from 'fs'
 import * as path from 'path'
 import { EventsData } from './types'
 
-const DATA_DIR = path.resolve(__dirname, '../../data')
+const DATA_DIR = path.resolve(process.env.DATA_DIR || path.resolve(__dirname, '../../data'))
 const DATA_FILE = path.join(DATA_DIR, 'events.json')
 
 function ensureDir(): void {

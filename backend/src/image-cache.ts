@@ -4,7 +4,7 @@ import * as crypto from 'crypto'
 import { CalendarActivity } from './types'
 import { fetchBuffer } from './utils/fetch'
 
-const IMAGES_DIR = path.resolve(__dirname, '../../data/images')
+const IMAGES_DIR = path.resolve(process.env.DATA_DIR || path.resolve(__dirname, '../../data'), 'images')
 
 function ensureDir(): void {
   if (!fs.existsSync(IMAGES_DIR)) {

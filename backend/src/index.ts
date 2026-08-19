@@ -9,7 +9,7 @@ import { stopScheduler, startScheduler } from './scheduler'
 
 const PORT = parseInt(process.env.PORT || '2444', 10)
 const FRONTEND_DIR = path.resolve(process.env.FRONTEND_DIR || path.resolve(__dirname, '../../frontend'))
-const DATA_DIR = path.resolve(__dirname, '../../data')
+const DATA_DIR = path.resolve(process.env.DATA_DIR || path.resolve(__dirname, '../../data'))
 
 const app = express()
 app.use(express.json())
