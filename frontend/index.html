@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Perspective · 活动追踪</title>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <div class="bg-deco"></div>
+  <div class="bg-deco-2"></div>
+
+  <div class="app">
+    <div class="top-bar">
+      <div class="left">
+        <div class="brand">
+          ACTIVITY
+          <span>game event timeline</span>
+        </div>
+      </div>
+      <div class="right">
+        <div class="day" id="date-display"></div>
+        <button class="theme-btn" id="view-btn" onclick="toggleView()" title="切换视图">≡ 时间线</button>
+        <button class="theme-btn" id="theme-btn" onclick="toggleTheme()" title="切换暗色模式">🌙</button>
+        <button class="theme-btn" onclick="openAbout()" title="关于"><span style="font-size:13px">ⓘ</span></button>
+      </div>
+    </div>
+
+    <div class="stats-row" id="stats"></div>
+
+    <div class="urgency-strip">
+      <div class="label">🔥 urgent</div>
+      <div class="items" id="urgency-items"></div>
+    </div>
+
+    <div class="filter-row" id="filter-row"></div>
+
+    <div id="event-container"></div>
+
+    <div class="last-updated" id="last-updated"></div>
+  </div>
+
+  <div class="modal-overlay" id="modal-overlay" onclick="if(event.target===this)closeModal()">
+    <div class="modal-content">
+      <button class="modal-close" onclick="closeModal()">✕</button>
+      <img class="modal-img" id="modal-img" src="" alt="">
+      <div class="modal-body">
+        <div class="modal-game" id="modal-game"></div>
+        <div class="modal-title" id="modal-title"></div>
+        <div class="modal-time" id="modal-time"></div>
+        <a class="modal-link" id="modal-link" target="_blank" rel="noopener">查看详情 →</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="about-overlay" onclick="if(event.target===this)closeAbout()">
+    <div class="modal-content">
+      <button class="modal-close" onclick="closeAbout()">✕</button>
+      <div class="modal-body">
+        <div class="modal-title" style="font-size:20px;font-family:Oswald,sans-serif">ABOUT</div>
+        <div class="about-content" id="about-content" style="font-size:13px;line-height:1.8;color:var(--text-dim);margin-top:12px"></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/app.js"></script>
+</body>
+</html>

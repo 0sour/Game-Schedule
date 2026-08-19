@@ -1,0 +1,12 @@
+services:
+  game-event:
+    build: .
+    ports:
+      - "2666:2666"
+    environment:
+      - PORT=2666
+      - HTTP_PROXY=http://192.168.10.110:7890
+      - HTTPS_PROXY=http://192.168.10.110:7890
+    volumes:
+      - ./data:/app/data
+    restart: unless-stopped
