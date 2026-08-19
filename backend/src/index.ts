@@ -66,13 +66,22 @@ app.get('/api/status', (_req, res) => {
 })
 
 app.get('/api/about', (_req, res) => {
-  const mdPath = path.resolve(__dirname, '../../README.md')
-  try {
-    const md = fs.readFileSync(mdPath, 'utf-8')
-    res.json({ code: 200, data: md })
-  } catch {
-    res.json({ code: 200, data: '# Game Event Calendar\n\nA single-page game event calendar.' })
+  // 本地开发：backend/dist/../../README.md；容器内：/app/dist/../README.md
+  const candidates = [
+    process.env.README_PATH,
+    path.resolve(__dirname, '../../README.md'),
+    path.resolve(__dirname, '../README.md'),
+  ].filter(Boolean) as string[]
+  for (const mdPath of candidates) {
+    try {
+      const md = fs.readFileSync(mdPath, 'utf-8')
+      res.json({ code: 200, data: md })
+      return
+    } catch {
+      // 尝试下一个候选路径
+    }
   }
+  res.json({ code: 200, data: '# Game Event Calendar\n\nA single-page game event calendar.' })
 })
 
 app.get('/api/games', (_req, res) => {
