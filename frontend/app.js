@@ -340,24 +340,89 @@ function closeAbout() {
 
 function renderMarkdown(md) {
   const lines = md.split('\n')
-  let inTable = false
   let html = ''
+  let inTable = false
+  let inCode = false
+  let codeBuf = []
+  let listType = null // 'ul' | 'ol'
+  let listBuf = []
+
+  const closeList = () => {
+    if (listBuf.length) {
+      html += `<${listType}>${listBuf.join('')}</${listType}>`
+      listBuf = []
+      listType = null
+    }
+  }
+  const closeTable = () => {
+    if (inTable) { html += '</table>'; inTable = false }
+  }
+  const closeCode = () => {
+    if (inCode) {
+      html += `<pre style="background:var(--surface2);border:1px solid var(--border-light);padding:10px 12px;overflow-x:auto;font-size:11px;line-height:1.6;margin:8px 0">${esc(codeBuf.join('\n'))}</pre>`
+      codeBuf = []
+      inCode = false
+    }
+  }
+  // 行内格式：`code`、**bold**、[text](url)
+  const inline = s => s
+    .replace(/`([^`]+)`/g, '<code style="background:var(--surface2);padding:1px 5px;font-size:11px;border:1px solid var(--border-light)">$1</code>')
+    .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+    .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener" style="color:var(--text);text-decoration:underline">$1</a>')
+
   for (const line of lines) {
-    if (line.startsWith('# ')) html += `<h3 style="margin:12px 0 6px;font-size:16px">${line.slice(2)}</h3>`
-    else if (line.startsWith('## ')) html += `<h4 style="margin:10px 0 4px;font-size:14px">${line.slice(3)}</h4>`
-    else if (line.startsWith('- ')) html += `<div>• ${line.slice(2)}</div>`
-    else if (line.startsWith('| ') && line.endsWith('|')) {
+    // 代码块
+    if (line.trim().startsWith('```')) {
+      if (inCode) closeCode()
+      else { closeList(); closeTable(); inCode = true }
+      continue
+    }
+    if (inCode) { codeBuf.push(line); continue }
+
+    // 标题
+    const h = line.match(/^(#{1,4})\s+(.*)/)
+    if (h) {
+      closeList(); closeTable()
+      const level = h[1].length
+      const size = level === 1 ? 18 : level === 2 ? 15 : level === 3 ? 13 : 12
+      html += `<h${level} style="margin:14px 0 6px;font-size:${size}px;font-weight:600">${inline(h[2])}</h${level}>`
+      continue
+    }
+    // 分隔线
+    if (/^---+$/.test(line.trim())) {
+      closeList(); closeTable()
+      html += '<hr style="border:none;border-top:1px solid var(--border-light);margin:12px 0">'
+      continue
+    }
+    // 无序列表
+    if (/^\s*[-*]\s+/.test(line)) {
+      closeTable()
+      if (listType !== 'ul') { closeList(); listType = 'ul' }
+      listBuf.push(`<li style="margin:2px 0">${inline(line.replace(/^\s*[-*]\s+/, ''))}</li>`)
+      continue
+    }
+    // 有序列表
+    if (/^\s*\d+\.\s+/.test(line)) {
+      closeTable()
+      if (listType !== 'ol') { closeList(); listType = 'ol' }
+      listBuf.push(`<li style="margin:2px 0">${inline(line.replace(/^\s*\d+\.\s+/, ''))}</li>`)
+      continue
+    }
+    // 表格
+    if (line.startsWith('| ') && line.endsWith('|')) {
+      closeList()
       if (!inTable) { inTable = true; html += '<table style="width:100%;border-collapse:collapse;margin:8px 0;font-size:12px"><tr>' }
       const cells = line.split('|').filter(Boolean)
       const isHeader = /^[-]+$/.test(cells[0]?.trim())
       if (isHeader) continue
-      html += '<tr>' + cells.map(c => `<td style="padding:4px 8px;border:1px solid var(--border-light)">${c.trim()}</td>`).join('') + '</tr>'
-    } else {
-      if (inTable) { html += '</table>'; inTable = false }
-      if (line.trim()) html += `<p style="margin:4px 0">${line}</p>`
+      html += '<tr>' + cells.map(c => `<td style="padding:4px 8px;border:1px solid var(--border-light)">${inline(c.trim())}</td>`).join('') + '</tr>'
+      continue
     }
+    // 普通段落
+    closeList(); closeTable()
+    if (line.trim()) html += `<p style="margin:4px 0">${inline(line)}</p>`
   }
-  if (inTable) html += '</table>'
+  closeList(); closeTable(); closeCode()
   return html
 }
 
